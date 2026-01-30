@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>This app needs access to system audio to transcribe meetings.</string>
+    <key>NSCalendarsUsageDescription</key>
+    <string>This app needs access to your calendars to automatically create meetings from calendar events.</string>
+    <key>NSAppleEventsUsageDescription</key>
+    <string>Meeting Transcriber needs to control the Calendar app via AppleScript so it can read your events for syncing.</string>
+    <key>NSUserNotificationUsageDescription</key>
+    <string>Meeting Transcriber sends reminders about your upcoming and completed meetings.</string>
+</dict>
+</plist>

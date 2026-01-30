@@ -1,0 +1,1421 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="/src/styles.css" />
+    <link 
+      rel="icon" 
+      type="image/svg+xml" 
+      href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2064%2064%27%3E%3Cdefs%3E%3ClinearGradient%20id%3D%27g%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%271%27%20y2%3D%271%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27%23f25c2d%27/%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%230ea5e9%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width%3D%2764%27%20height%3D%2764%27%20rx%3D%2714%27%20fill%3D%27%230f172a%27/%3E%3Ccircle%20cx%3D%2732%27%20cy%3D%2732%27%20r%3D%2722%27%20fill%3D%27url%28%23g%29%27/%3E%3Cpath%20d%3D%27M18%2032h28%27%20stroke%3D%27%23f8fafc%27%20stroke-width%3D%274%27%20stroke-linecap%3D%27round%27/%3E%3Ccircle%20cx%3D%2732%27%20cy%3D%2732%27%20r%3D%277%27%20fill%3D%27%23fff7f0%27/%3E%3Ccircle%20cx%3D%2732%27%20cy%3D%2732%27%20r%3D%274%27%20fill%3D%27%230f172a%27/%3E%3C/svg%3E" 
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Jilu - Meeting Memory</title>
+    <script type="module" src="/src/main.ts" defer></script>
+  </head>
+
+  <body>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+    <!-- Onboarding -->
+    <div id="onboarding" class="onboarding" aria-hidden="true">
+      <div class="onboarding-panel">
+        <div class="onboarding-visual">
+          <div class="orb orb-1"></div>
+          <div class="orb orb-2"></div>
+          <div class="onboarding-hero-copy">
+            <p class="eyebrow">Welcome</p>
+            <h1>Meet Jilu, your mindful recorder</h1>
+            <p class="lede">Tune Jilu for your voice, calendar, and AI so every conversation is remembered with intent.</p>
+            <div class="onboarding-fun" id="onboarding-fun-fact">In Mandarin, "jilu" means to record - let's honor every word.</div>
+          </div>
+        </div>
+        <div class="onboarding-card">
+          <div class="onboarding-card-header">
+            <div class="onboarding-pill" id="onboarding-step-pill">Step 1 of 3</div>
+            <button id="onboarding-skip" type="button" class="btn btn-secondary ghost-btn">Skip for now</button>
+          </div>
+          <div class="onboarding-steps">
+            <div class="onboarding-step active" data-onboarding-step="0">
+              <h2>Welcome aboard</h2>
+              <p>We'll wire up your voice pipeline, AI helper, calendar, and exports.</p>
+              <ul class="onboarding-list">
+                <li>Point us to your Speechmatics region</li>
+                <li>Drop in your Speechmatics API key</li>
+                <li>Optional: add OpenAI for chat + summaries</li>
+                <li>Optional: enroll your voice for speaker ID</li>
+                <li>Optional: turn on calendar and auto-export</li>
+              </ul>
+            </div>
+            <div class="onboarding-step" data-onboarding-step="1">
+              <h2>Connect Speechmatics</h2>
+              <p>Tell us where to stream and which key to use.</p>
+              <div class="form-group">
+                <label for="onboarding-speechmatics-url">Speechmatics URL</label>
+                <input 
+                  id="onboarding-speechmatics-url" 
+                  type="text" 
+                  placeholder="wss://eu2.rt.speechmatics.com/v2" 
+                  autocomplete="off"
+                />
+                <small>Use your real-time endpoint. We'll attach the JWT for you.</small>
+              </div>
+              <div class="form-group">
+                <label for="onboarding-speechmatics-key">Speechmatics API Key</label>
+                <input 
+                  id="onboarding-speechmatics-key" 
+                  type="password" 
+                  placeholder="Paste your key..." 
+                  autocomplete="off"
+                />
+                <small>Grab it from the Speechmatics portal.</small>
+              </div>
+            </div>
+            <div class="onboarding-step" data-onboarding-step="2">
+              <h2>Invite your AI summariser</h2>
+              <p>Optional, but highly recommended for chat + summaries.</p>
+              <div class="form-group">
+                <label for="onboarding-openai-key">OpenAI API Key</label>
+                <input 
+                  id="onboarding-openai-key" 
+                  type="password" 
+                  placeholder="sk-... (optional when using local LLM)" 
+                  autocomplete="off"
+                />
+              </div>
+              <label class="onboarding-toggle">
+                <input id="onboarding-use-local-llm" type="checkbox" />
+                <span>Use local/custom LLM (Ollama / LM Studio / Azure / other)</span>
+              </label>
+              <div id="onboarding-local-llm-fields" class="onboarding-collapsible">
+                <div class="form-group split-fields">
+                  <div class="form-group">
+                    <label for="onboarding-openai-endpoint">API Endpoint</label>
+                    <input 
+                      id="onboarding-openai-endpoint" 
+                      type="text" 
+                      placeholder="https://api.openai.com/v1" 
+                      autocomplete="off"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="onboarding-openai-model">Model</label>
+                    <input 
+                      id="onboarding-openai-model" 
+                      type="text" 
+                      placeholder="gpt-4o-mini" 
+                      autocomplete="off"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div class="onboarding-tip">You can tweak these anytime in Settings.</div>
+            </div>
+            <div class="onboarding-step" data-onboarding-step="3">
+              <h2>Train your voice</h2>
+              <p>Give Speechmatics a quick 15s sample so transcripts know it's you.</p>
+              <div class="split-fields">
+                <div class="form-group">
+                  <label for="onboarding-voice-name">Your name</label>
+                  <input id="onboarding-voice-name" type="text" placeholder="e.g. Alex Taylor" autocomplete="off" />
+                </div>
+                <div class="form-group">
+                  <label for="onboarding-voice-email">Email (optional)</label>
+                  <input id="onboarding-voice-email" type="email" placeholder="you@example.com" autocomplete="email" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label>15 second script to read</label>
+                <div id="onboarding-voice-script" class="voice-script-text"></div>
+              </div>
+              <div class="form-group split-fields">
+                <div class="form-group">
+                  <label for="onboarding-voice-device">Microphone for this sample:</label>
+                  <select id="onboarding-voice-device" class="form-select">
+                    <option value="">Default Microphone</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>&nbsp;</label>
+                  <button id="onboarding-voice-record" type="button" class="btn btn-primary btn-small">Record 15s sample</button>
+                </div>
+              </div>
+              <div id="onboarding-voice-samples" class="voice-sample-list"></div>
+              <div class="onboarding-inline-actions">
+                <button id="onboarding-voice-clear" type="button" class="btn btn-secondary ghost-btn">Clear samples</button>
+                <button id="onboarding-voice-enroll" type="button" class="btn btn-primary">Enroll voice</button>
+              </div>
+              <div id="onboarding-voice-status" class="small-text"></div>
+              <div class="onboarding-tip">Samples stay local. Enrollment sends only the audio chunks to Speechmatics for diarization.</div>
+            </div>
+            <div class="onboarding-step" data-onboarding-step="4">
+              <h2>Calendar sync</h2>
+              <p>Keep your notes aligned to the right meetings and reminders.</p>
+              <div class="onboarding-note">
+                Calendars sync via Apple Calendar. Make sure your Google/Outlook accounts are added in macOS
+                System Settings → Internet Accounts, open the Apple Calendar app once, and let it finish syncing.
+              </div>
+              <div class="form-group">
+                <label class="onboarding-toggle">
+                  <input id="onboarding-calendar-toggle" type="checkbox" />
+                  <span>Enable calendar sync + reminders</span>
+                </label>
+                <small>Requires macOS calendar permission. We never leave your device.</small>
+              </div>
+              <div class="onboarding-inline-actions">
+                <button id="onboarding-calendar-permission" type="button" class="btn btn-primary ghost-btn">Grant calendar permission</button>
+              </div>
+              <div id="onboarding-calendar-settings">
+                <div class="form-group split-fields">
+                  <div class="form-group">
+                    <label for="onboarding-sync-interval">Sync every (minutes)</label>
+                    <input id="onboarding-sync-interval" type="number" min="1" value="5" />
+                  </div>
+                  <div class="form-group">
+                    <label for="onboarding-reminder-minutes">Remind me before (minutes)</label>
+                    <input id="onboarding-reminder-minutes" type="number" min="0" value="5" />
+                  </div>
+                </div>
+                <div class="form-group split-fields">
+                  <label class="onboarding-toggle">
+                    <input id="onboarding-auto-stop-reminder" type="checkbox" checked />
+                    <span>Auto-stop reminder when meetings end</span>
+                  </label>
+                  <label class="onboarding-toggle">
+                    <input id="onboarding-notifications-toggle" type="checkbox" checked />
+                    <span>Enable desktop notifications</span>
+                  </label>
+                </div>
+                <div class="form-group">
+                  <label>Choose calendars to sync</label>
+                  <div id="onboarding-calendar-list" class="calendar-list"></div>
+                </div>
+              </div>
+            </div>
+            <div class="onboarding-step" data-onboarding-step="5">
+              <h2>Auto-export</h2>
+              <p>Drop every meeting into a folder automatically.</p>
+              <div class="form-group">
+                <label class="onboarding-toggle">
+                  <input id="onboarding-export-toggle" type="checkbox" />
+                  <span>Enable auto-export</span>
+                </label>
+              </div>
+              <div class="form-group">
+                <label for="onboarding-export-path">Export folder</label>
+                <input 
+                  id="onboarding-export-path" 
+                  type="text" 
+                  placeholder="~/Documents/MeetingNotes" 
+                  autocomplete="off"
+                />
+              </div>
+              <div class="onboarding-inline-actions">
+                <button id="onboarding-export-browse" type="button" class="btn btn-primary ghost-btn">Browse…</button>
+                <button id="onboarding-export-default" type="button" class="btn btn-secondary ghost-btn">Use default</button>
+              </div>
+              <div class="onboarding-tip">Exports happen when meetings are saved and contain content.</div>
+            </div>
+          </div>
+          <div class="onboarding-progress">
+            <div class="onboarding-dots" id="onboarding-dots">
+              <span class="onboarding-dot active"></span>
+              <span class="onboarding-dot"></span>
+              <span class="onboarding-dot"></span>
+              <span class="onboarding-dot"></span>
+              <span class="onboarding-dot"></span>
+              <span class="onboarding-dot"></span>
+            </div>
+            <div class="onboarding-progress-bar">
+              <div id="onboarding-progress-fill"></div>
+            </div>
+          </div>
+          <div class="onboarding-actions">
+            <button id="onboarding-back" type="button" class="btn btn-secondary ghost-btn">Back</button>
+            <div class="onboarding-action-right">
+              <button id="onboarding-next" type="button" class="btn btn-primary">Next</button>
+              <button id="onboarding-finish" type="button" class="btn btn-primary">Save &amp; launch</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Template Manager Modal -->
+    <div id="template-manager-modal" class="modal">
+      <div class="modal-content modal-large">
+        <div class="modal-header">
+          <h2><span class="heading-icon" id="template-manager-heading-icon"></span>Prompt Template Manager</h2>
+          <button class="close-btn" id="close-template-manager" title="Close template manager">
+            <span id="close-template-manager-icon"></span>
+          </button>
+        </div>
+        <div class="modal-body template-manager-body">
+          <div class="template-manager-layout">
+            <div class="template-sidebar">
+              <div class="template-sidebar-header">
+                <button id="new-template-btn" class="btn btn-primary btn-small">+ New Template</button>
+              </div>
+              <div id="template-list" class="template-list">
+                <!-- Template list will be populated here -->
+              </div>
+            </div>
+            <div id="template-editor" class="template-editor">
+              <!-- Template editor will be populated here -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal">
+      <div class="modal-content modal-settings">
+        <div class="modal-header">
+          <h2><span class="heading-icon" id="settings-heading-icon"></span>Settings</h2>
+          <button class="close-btn" id="close-settings" title="Close settings">
+            <span id="close-settings-icon"></span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="settings-layout">
+            <nav class="settings-tabs" role="tablist" aria-label="Settings sections">
+              <button 
+                id="settings-tab-general" 
+                type="button" 
+                class="settings-tab active" 
+                data-tab="general" 
+                role="tab" 
+                aria-controls="settings-panel-general" 
+                aria-selected="true" 
+                tabindex="0"
+              >
+                General
+              </button>
+              <button 
+                id="settings-tab-automation" 
+                type="button" 
+                class="settings-tab" 
+                data-tab="automation" 
+                role="tab" 
+                aria-controls="settings-panel-automation" 
+                aria-selected="false" 
+                tabindex="-1"
+              >
+                Automation
+              </button>
+              <button 
+                id="settings-tab-calendar" 
+                type="button" 
+                class="settings-tab" 
+                data-tab="calendar" 
+                role="tab" 
+                aria-controls="settings-panel-calendar" 
+                aria-selected="false" 
+                tabindex="-1"
+              >
+                Calendar
+              </button>
+              <button 
+                id="settings-tab-data" 
+                type="button" 
+                class="settings-tab" 
+                data-tab="data" 
+                role="tab" 
+                aria-controls="settings-panel-data" 
+                aria-selected="false" 
+                tabindex="-1"
+              >
+                Data
+              </button>
+            </nav>
+
+            <div class="settings-panels">
+              <section 
+                id="settings-panel-general" 
+                class="settings-panel active" 
+                data-tab-panel="general" 
+                role="tabpanel" 
+                aria-labelledby="settings-tab-general"
+              >
+                <div class="settings-grid">
+                  <div id="custom-dictionary-card" class="settings-card">
+                    <div class="settings-card-header">
+                      <h3>Audio & AI</h3>
+                      <p>Choose your microphone and configure AI providers.</p>
+                    </div>
+                    <div class="form-group">
+                    <label for="audio-device">Microphone Input:</label>
+                    <select id="audio-device" class="form-select">
+                      <option value="">Default Microphone</option>
+                    </select>
+                    <small>Select which microphone to use for recording. System audio is always captured.</small>
+                  </div>
+                  <div class="form-group">
+                    <label for="speechmatics-url">Speechmatics URL:</label>
+                    <input 
+                      id="speechmatics-url" 
+                      type="text" 
+                      placeholder="wss://eu2.rt.speechmatics.com/v2" 
+                      autocomplete="off"
+                    />
+                    <small>Pick the RT endpoint closest to you. We'll attach your JWT automatically.</small>
+                  </div>
+                  <div class="form-group">
+                    <label for="speechmatics-key">Speechmatics API Key:</label>
+                    <input 
+                      id="speechmatics-key" 
+                      type="password" 
+                        placeholder="Enter your Speechmatics API key..." 
+                        autocomplete="off"
+                      />
+                      <small>Get your key from <a href="https://portal.speechmatics.com/api-keys" target="_blank">Speechmatics Portal</a></small>
+                    </div>
+                    <div class="form-group">
+                      <label for="openai-key">OpenAI API Key (optional for local LLM):</label>
+                      <input 
+                        id="openai-key" 
+                        type="password" 
+                        placeholder="Enter your OpenAI API key..." 
+                        autocomplete="off"
+                      />
+                      <small>Get your key from <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI Platform</a></small>
+                    </div>
+                    
+                    <div class="form-group">
+                      <label for="openai-endpoint">OpenAI API Endpoint (Optional):</label>
+                      <input 
+                        id="openai-endpoint" 
+                        type="text" 
+                        placeholder="https://api.openai.com/v1" 
+                        autocomplete="off"
+                      />
+                      <small>Leave default for OpenAI, or use http://localhost:11434/v1 for Ollama or http://localhost:1234/v1 for LM Studio</small>
+                    </div>
+                    
+                    <div class="form-group">
+                      <label for="openai-model">Model Name:</label>
+                      <input 
+                        id="openai-model" 
+                        type="text" 
+                        placeholder="gpt-4o-mini" 
+                        autocomplete="off"
+                      />
+                      <small>Model to use (gpt-4o-mini for OpenAI, or your local model name for LM Studio/Ollama)</small>
+                    </div>
+                  </div>
+
+                  <div class="settings-card" id="voice-id-card">
+                    <div class="settings-card-header">
+                      <h3>Voice ID (Speechmatics)</h3>
+                      <p>Enroll your own voice so transcripts tag you by name, even when you switch microphones.</p>
+                    </div>
+                    <div class="form-group split-fields">
+                      <div class="form-group">
+                        <label for="speaker-name">Your name:</label>
+                        <input 
+                          id="speaker-name" 
+                          type="text" 
+                          placeholder="e.g. Alex Taylor" 
+                          autocomplete="off"
+                        />
+                      </div>
+                      <div class="form-group">
+                        <label for="speaker-email">Email (optional):</label>
+                        <input 
+                          id="speaker-email" 
+                          type="email" 
+                          placeholder="you@example.com" 
+                          autocomplete="email"
+                        />
+                      </div>
+                    </div>
+                    <div class="voice-script">
+                      <div class="voice-script-label">15 second script to read</div>
+                      <p id="voice-script-text" class="voice-script-text"></p>
+                    </div>
+                    <div class="form-group">
+                      <label for="voice-sample-device">Microphone for this sample:</label>
+                      <select id="voice-sample-device" class="form-select">
+                        <option value="">Default Microphone</option>
+                      </select>
+                      <small>Record a short clip for each mic you use so Speechmatics can learn your voice.</small>
+                    </div>
+                    <div class="voice-actions">
+                      <button id="record-voice-sample-btn" type="button" class="btn btn-secondary btn-small">
+                        <span>Record 15s sample</span>
+                      </button>
+                      <button id="clear-voice-samples-btn" type="button" class="btn btn-secondary btn-small ghost-btn">
+                        <span>Clear samples</span>
+                      </button>
+                    </div>
+                    <div id="voice-sample-list" class="voice-sample-list">
+                      <p class="small-text">No samples yet. Record a clip with the mic you'll use.</p>
+                    </div>
+                    <div class="form-group">
+                      <button id="enroll-voice-profile-btn" type="button" class="btn btn-primary">
+                        Enroll voice with Speechmatics
+                      </button>
+                      <small id="speaker-id-status">Not enrolled yet. Uses your Speechmatics API key.</small>
+                    </div>
+                    <div id="speaker-identifiers" class="speaker-identifiers">
+                      <span class="small-text">Saved speaker identifiers will appear here after enrollment.</span>
+                    </div>
+                  </div>
+
+                  <div class="settings-card">
+                    <div class="settings-card-header">
+                      <h3>Templates & Workflow</h3>
+                      <p>Control the default prompt template.</p>
+                    </div>
+                    <div class="form-group">
+                      <label for="default-template-select">Default Prompt Template:</label>
+                      <select id="default-template-select" class="form-select">
+                        <option value="default-summary">Default Summary</option>
+                      </select>
+                      <small>Template to use by default when enhancing notes</small>
+                    </div>
+                    
+                    <div class="form-group">
+                      <button id="manage-templates-btn" type="button" class="btn btn-secondary" title="Open template manager">
+                        <span class="btn-icon-inline" id="manage-templates-icon"></span>
+                        <span>Manage Templates</span>
+                      </button>
+                      <small>Create, edit, and manage prompt templates</small>
+                    </div>
+                  </div>
+
+                  <div class="settings-card">
+                    <div class="settings-card-header">
+                      <h3>Custom Dictionary</h3>
+                      <p>Add company names and jargon so Speechmatics hears them correctly.</p>
+                    </div>
+                    <div class="custom-dictionary-header">
+                      <button id="custom-dictionary-add-btn" type="button" class="btn btn-secondary btn-small" title="Add custom dictionary term">
+                        <span class="btn-icon-inline" id="add-term-icon"></span>
+                        <span>Add Term</span>
+                      </button>
+                      <span id="custom-dictionary-count" class="custom-dictionary-count">
+                        0 / 1000 terms
+                      </span>
+                    </div>
+                    <form id="custom-dictionary-form" class="custom-dictionary-form" hidden>
+                      <div class="form-group">
+                        <label for="custom-dictionary-term-input">Term:</label>
+                        <input
+                          id="custom-dictionary-term-input"
+                          type="text"
+                          autocomplete="off"
+                          placeholder="e.g. AcmeCorp"
+                        />
+                      </div>
+                      <div class="form-group">
+                        <label for="custom-dictionary-sounds-like-input">Sounds like (optional):</label>
+                        <input
+                          id="custom-dictionary-sounds-like-input"
+                          type="text"
+                          autocomplete="off"
+                          placeholder="Comma-separated pronunciations"
+                        />
+                        <small>Separate multiple pronunciations with commas.</small>
+                      </div>
+                      <div class="custom-dictionary-form-actions">
+                        <button type="submit" class="btn btn-primary btn-small">Save</button>
+                        <button type="button" id="custom-dictionary-cancel-btn" class="btn btn-secondary btn-small">
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                    <div class="custom-dictionary-list-container">
+                      <ul id="custom-dictionary-list" class="custom-dictionary-list">
+                        <li class="custom-dictionary-empty">No custom terms yet. Add your first term.</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div class="settings-card">
+                    <div class="settings-card-header">
+                      <h3>Keyboard Shortcuts</h3>
+                      <p>Stay quick with global shortcuts.</p>
+                    </div>
+                    <div class="form-group">
+                      <label for="global-shortcut">Global Shortcut (New Note):</label>
+                      <input 
+                        id="global-shortcut" 
+                        type="text" 
+                        placeholder="CommandOrControl+Shift+M" 
+                        autocomplete="off"
+                      />
+                      <small>Keyboard shortcut to create a new note from anywhere. Use CommandOrControl for cross-platform (e.g., CommandOrControl+Shift+M, Alt+N, Shift+F9)</small>
+                    </div>
+                    
+                    <div class="form-group">
+                      <label for="mute-shortcut">Mute Shortcut (Toggle Recording Mute):</label>
+                      <input 
+                        id="mute-shortcut" 
+                        type="text" 
+                        placeholder="CommandOrControl+Shift+K" 
+                        autocomplete="off"
+                      />
+                      <small>Keyboard shortcut to mute/unmute recording from anywhere. Leave empty to disable. (e.g., CommandOrControl+Shift+K, Alt+M)</small>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section 
+                id="settings-panel-automation" 
+                class="settings-panel" 
+                data-tab-panel="automation" 
+                role="tabpanel" 
+                aria-labelledby="settings-tab-automation" 
+                aria-hidden="true"
+              >
+                <div class="settings-card">
+                  <div class="settings-card-header">
+                    <h3>Auto Export</h3>
+                    <p>Automatically save meeting folders.</p>
+                  </div>
+                  <div class="form-group">
+                    <label>
+                      <input type="checkbox" id="export-enabled" />
+                      Auto-export meetings to files
+                    </label>
+                    <small>Automatically save meetings as markdown files when updated</small>
+                  </div>
+                  
+                  <div class="form-group" id="export-path-group">
+                    <label for="export-path">Export Folder Path:</label>
+                    <div class="inline-input">
+                      <input 
+                        id="export-path" 
+                        type="text" 
+                        placeholder="Select folder..." 
+                        readonly
+                      />
+                      <button id="browse-export-path" type="button" class="btn btn-secondary btn-small">Browse</button>
+                    </div>
+                    <small>Choose where to save your meeting folders</small>
+                  </div>
+                </div>
+              </section>
+
+              <section 
+                id="settings-panel-calendar" 
+                class="settings-panel" 
+                data-tab-panel="calendar" 
+                role="tabpanel" 
+                aria-labelledby="settings-tab-calendar" 
+                aria-hidden="true"
+              >
+                <div class="settings-card">
+                  <div class="settings-card-header">
+                    <h3>Calendar Sync</h3>
+                    <p>Sync and remind yourself using macOS Calendar.</p>
+                  </div>
+                  <div class="form-group">
+                    <label>Calendar Sync:</label>
+                    <div class="calendar-sync-row">
+                      <label class="checkbox-inline">
+                        <input type="checkbox" id="calendar-sync-enabled" />
+                        Enable Calendar Sync
+                      </label>
+                      <button id="request-calendar-permission-btn" type="button" class="btn btn-secondary btn-small" title="Request calendar access permission">
+                        <span class="btn-icon-inline" id="calendar-permission-icon"></span>
+                        <span>Grant Permission</span>
+                      </button>
+                      <span id="calendar-permission-status" class="status-badge" style="display: none;"></span>
+                    </div>
+                    <small>Automatically sync meetings from your macOS Calendar</small>
+                  </div>
+
+                  <div class="form-group">
+                    <label>Desktop Notifications:</label>
+                    <div class="calendar-sync-row">
+                      <label class="checkbox-inline">
+                        <input type="checkbox" id="notifications-enabled" />
+                        Enable meeting notifications
+                      </label>
+                      <button id="request-notification-permission-btn" type="button" class="btn btn-secondary btn-small" title="Allow notification permission">
+                        <span class="btn-icon-inline" id="notification-permission-icon"></span>
+                        <span>Allow Notifications</span>
+                      </button>
+                      <span id="notification-permission-status" class="status-badge" style="display: none;"></span>
+                    </div>
+                    <small>Show desktop reminders before and after meetings</small>
+                  </div>
+                  
+                  <div id="calendar-settings-group" style="display: none;">
+                    <div class="form-group">
+                      <label for="calendar-list">Select Calendars to Sync:</label>
+                      <div id="calendar-list" class="calendar-list">
+                        <p class="loading-text">Loading calendars...</p>
+                      </div>
+                      <small>Choose which calendars to sync meetings from</small>
+                    </div>
+                    
+                    <div class="form-group">
+                      <label for="sync-interval">Sync Interval (minutes):</label>
+                      <input 
+                        id="sync-interval" 
+                        type="number" 
+                        min="1" 
+                        max="60" 
+                        value="5"
+                      />
+                      <small>How often to check for calendar updates</small>
+                    </div>
+                    
+                    <div class="form-group">
+                      <label for="reminder-minutes">Reminder Before Meeting (minutes):</label>
+                      <input 
+                        id="reminder-minutes" 
+                        type="number" 
+                        min="0" 
+                        max="60" 
+                        value="5"
+                      />
+                      <small>Get notified before meetings start</small>
+                    </div>
+                    
+                    <div class="form-group">
+                      <label class="checkbox-inline">
+                        <input type="checkbox" id="auto-stop-reminder" checked />
+                        Remind to stop recording after meeting ends
+                      </label>
+                      <small>Get notified if recording continues after meeting time</small>
+                    </div>
+                    
+                    <div class="form-group">
+                      <div class="button-row">
+                        <button id="sync-now-btn" type="button" class="btn btn-secondary" title="Sync calendars now">
+                          <span class="btn-icon-inline" id="sync-now-icon"></span>
+                          <span>Sync Now</span>
+                        </button>
+                        <button id="test-reminders-btn" type="button" class="btn btn-secondary btn-small" title="Send test notification">
+                          <span class="btn-icon-inline" id="test-reminders-icon"></span>
+                          <span>Test Reminders</span>
+                        </button>
+                      </div>
+                      <small>Sync calendars or send yourself a sample reminder notification.</small>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section 
+                id="settings-panel-data" 
+                class="settings-panel" 
+                data-tab-panel="data" 
+                role="tabpanel" 
+                aria-labelledby="settings-tab-data" 
+                aria-hidden="true"
+              >
+                <div class="settings-card">
+                  <div class="settings-card-header">
+                    <h3>Backup & Restore</h3>
+                    <p>Keep your meeting history safe.</p>
+                  </div>
+                  <div class="form-group">
+                    <label>Database Backup:</label>
+                    <div class="button-row">
+                      <button id="export-database-btn" class="btn btn-secondary" type="button" title="Export all meetings to backup file">
+                        <span class="btn-icon-inline" id="export-db-icon"></span>
+                        <span>Export Database</span>
+                      </button>
+                      <button id="import-database-btn" class="btn btn-secondary" type="button" title="Import meetings from backup file">
+                        <span class="btn-icon-inline" id="import-db-icon"></span>
+                        <span>Import Database</span>
+                      </button>
+                    </div>
+                    <small>Export all meetings to a backup file or restore from a previous export (overwrites current data)</small>
+                  </div>
+                  <div class="form-group danger-zone">
+                    <label>Delete Everything:</label>
+                    <p class="small-text">Remove all meetings and notes stored on this device. This cannot be undone.</p>
+                    <button id="delete-all-meetings-btn" class="btn btn-danger" type="button" title="Permanently delete all meetings and notes">
+                      <span class="btn-icon-inline" id="delete-all-icon"></span>
+                      <span>Delete All Notes</span>
+                    </button>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </div>
+
+          <div class="settings-footer">
+            <button id="save-settings" class="btn btn-primary">Save Settings</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main App Layout -->
+    <div class="app-container">
+      <!-- Mode Toggle Header -->
+      <header class="mode-toggle-header">
+        <div class="header-left">
+          <div class="brand-chip" aria-label="Jilu">
+            <div class="brand-icon" aria-hidden="true"></div>
+            <div class="brand-copy">
+              <span class="brand-name">Jilu</span>
+              <span class="brand-tagline">Record with intention</span>
+            </div>
+          </div>
+          <div class="mode-toggle-buttons">
+            <button id="meetings-mode-btn" class="mode-toggle-btn active" data-mode="meetings">
+              <span class="btn-icon-inline" id="meetings-icon"></span>
+              <span>Meetings</span>
+            </button>
+            <button id="calendar-mode-btn" class="mode-toggle-btn" data-mode="calendar">
+              <span class="btn-icon-inline" id="calendar-icon"></span>
+              <span>Calendar</span>
+            </button>
+            <button id="tasks-mode-btn" class="mode-toggle-btn" data-mode="tasks">
+              <span class="btn-icon-inline" id="tasks-icon"></span>
+              <span>Tasks</span>
+            </button>
+          </div>
+        </div>
+        <div class="mode-toggle-right">
+          <div id="next-event-pill" class="next-event-pill" hidden></div>
+          <div class="mode-toggle-actions">
+            <button id="new-meeting-btn" class="btn btn-primary btn-small btn-icon-only" title="New Meeting" aria-label="New Meeting">
+              <span class="btn-icon-inline" id="new-meeting-icon"></span>
+            </button>
+            <button id="settings-btn" class="btn btn-secondary btn-small btn-icon-only" title="Settings" aria-label="Settings">
+              <span class="btn-icon-inline" id="settings-icon"></span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Meetings Mode Container -->
+      <div id="meetings-container" class="mode-container active">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+        <div class="sidebar-header">
+          <h1><span class="heading-icon" id="sidebar-meetings-icon"></span>Meetings</h1>
+          <div class="sidebar-header-actions">
+            <button class="sidebar-toggle-btn" id="sidebar-toggle-btn" title="Toggle sidebar">
+              <span>←</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="search-box">
+          <div class="search-input-wrapper">
+            <input 
+              id="search-input" 
+              type="text" 
+              placeholder="Search meetings..." 
+              class="search-input"
+            />
+            <button 
+              id="clear-search-btn" 
+              class="search-clear-btn" 
+              type="button" 
+              title="Clear search" 
+              aria-label="Clear search" 
+              aria-hidden="true"
+            >
+              <span id="clear-search-icon"></span>
+            </button>
+          </div>
+          <label class="search-toggle" for="search-full-content">
+            <input id="search-full-content" type="checkbox" />
+            <span>Full content</span>
+          </label>
+        </div>
+
+        <div id="tags-filter" class="tags-filter">
+          <div class="tags-filter-header">
+            <label for="tags-dropdown">Filter by tags:</label>
+            <button id="clear-tags-filter" class="clear-filter-btn" style="display: none;">Clear</button>
+          </div>
+          <select id="tags-dropdown" class="tags-dropdown" multiple size="5">
+            <option value="" disabled>No tags available</option>
+          </select>
+        </div>
+
+        <div id="meetings-list" class="meetings-list">
+          <div class="empty-state">
+            <p>No meetings yet</p>
+            <p class="small-text">Click "New" to start recording</p>
+          </div>
+        </div>
+
+      </aside>
+
+      <!-- Main Content Area -->
+      <main class="main-content">
+        <div id="empty-view" class="empty-main-view">
+          <div class="empty-main-content">
+            <h2>Welcome to Jilu</h2>
+            <p>Capture conversations with warmth, keep the thread with AI, and let every story stay findable.</p>
+            <button id="start-new-meeting" class="btn btn-primary btn-large" title="Create a new meeting">
+              <span class="btn-icon-inline" id="start-new-meeting-icon"></span>
+              <span>Start New Meeting</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="meeting-view" class="meeting-view" style="display: none;">
+          <!-- Meeting Header -->
+          <div class="meeting-header">
+            <div class="meeting-header-shell">
+              <div class="meeting-title-section">
+        <div class="title-row">
+          <input 
+            id="meeting-title" 
+            type="text" 
+            class="meeting-title-input" 
+            placeholder="Meeting Title..."
+          />
+          <span class="auto-save-indicator" id="auto-save-indicator">
+            <span class="spinner"></span>
+            <span id="auto-save-text">Saving...</span>
+          </span>
+          <span class="status-badge recording-pill" id="recording-status">Not Recording</span>
+        </div>
+                <div class="meeting-meta-row">
+                  <div class="meeting-meta">
+                    <span id="meeting-date" class="meeting-date"></span>
+                    <div id="meeting-series-indicator" class="meeting-series-indicator" hidden>
+                      <span class="series-label">Series:</span>
+                      <button
+                        id="meeting-series-button"
+                        type="button"
+                        class="series-pill"
+                        title="Show all notes in this series"
+                        aria-label="Show all notes in this series"
+                      ></button>
+                    </div>
+                  </div>
+                  <div class="meeting-tags-section">
+                    <div id="meeting-tags-display" class="tags-display"></div>
+                    <div class="tag-input-container">
+                      <input 
+                        id="tag-input" 
+                        type="text" 
+                        class="tag-input" 
+                        placeholder="Add tag..."
+                      />
+                      <div id="tag-suggestions" class="tag-suggestions" style="display: none;"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+                <div class="meeting-actions-panel" aria-label="Recording controls">
+                <div class="mic-activity" id="mic-activity" style="display: none;" aria-live="polite">
+                  <span class="mic-activity-dot" id="mic-activity-dot" aria-hidden="true"></span>
+                  <span class="mic-activity-label" id="mic-activity-label">Listening</span>
+                </div>
+                <div class="mic-selector" title="Select microphone input">
+                  <span class="mic-selector-label">Mic</span>
+                  <select 
+                    id="inline-audio-device" 
+                    class="inline-audio-select" 
+                    aria-label="Select microphone input"
+                >
+                  <option value="">Default Microphone</option>
+                </select>
+              </div>
+              <div class="meeting-actions">
+                <button 
+                  id="start-recording-btn" 
+                  class="btn btn-success btn-icon" 
+                  title="Start recording" 
+                  aria-label="Start recording"
+                >
+                  <span class="glyph glyph-mic" id="start-recording-icon"></span>
+                  <span class="sr-only">Start recording</span>
+                </button>
+                <button 
+                  id="stop-recording-btn" 
+                  class="btn btn-danger btn-icon" 
+                  title="Stop recording" 
+                  aria-label="Stop recording" 
+                  disabled
+                >
+                  <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor" />
+                  </svg>
+                  <span class="sr-only">Stop recording</span>
+                </button>
+                <button 
+                  id="mute-btn" 
+                  class="btn btn-warning btn-icon" 
+                  title="Mute microphone" 
+                  aria-label="Mute microphone" 
+                  disabled
+                >
+                  <span class="glyph glyph-mic" id="mute-icon-unmuted"></span>
+                  <span class="glyph glyph-mic-muted" id="mute-icon-muted"></span>
+                  <span class="sr-only">Mute microphone</span>
+                </button>
+                <button 
+                  id="enhance-notes-btn" 
+                  class="btn btn-primary btn-icon" 
+                  title="Enhance with AI" 
+                  aria-label="Enhance with AI" 
+                  disabled
+                >
+                  <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 4.5 13.2 8a1 1 0 0 0 .8.7l3.5.6-3.1 2.3a1 1 0 0 0-.36 1.05l.86 3.4-2.9-1.9a1 1 0 0 0-1.1 0l-2.9 1.9.86-3.4a1 1 0 0 0-.36-1.05L6.5 9.3l3.5-.6a1 1 0 0 0 .8-.7Z" fill="currentColor" />
+                  </svg>
+                  <span class="sr-only">Enhance with AI</span>
+                </button>
+              </div>
+            </div>
+            </div>
+          </div>
+
+          <section id="people-section" class="people-section collapsed">
+            <button
+              id="people-section-toggle"
+              class="people-section-toggle"
+              type="button"
+              aria-expanded="false"
+              aria-controls="people-section-content"
+              title="Toggle people section"
+            >
+              <span class="people-section-icon" id="people-section-icon" aria-hidden="true"></span>
+          <span class="people-section-label">People</span>
+          <span class="people-section-chevron" id="people-section-chevron" aria-hidden="true"></span>
+        </button>
+        <div id="people-section-content" class="people-bar" hidden>
+          <div class="people-chips-shell">
+            <div id="people-list" class="people-chips">
+              <span class="placeholder-text">People from the calendar will appear here</span>
+            </div>
+          </div>
+          <button
+            id="people-expand-btn"
+            class="people-expand-btn"
+            type="button"
+            aria-expanded="false"
+            hidden
+          >
+            Expand
+          </button>
+        </div>
+      </section>
+
+          <!-- Tabs -->
+          <div class="tabs">
+            <button class="tab-btn active" data-tab="notes">
+              <span class="btn-icon-inline" id="notes-tab-icon"></span>
+              <span>Personal Notes</span>
+            </button>
+            <button class="tab-btn" data-tab="transcript">
+              <span class="btn-icon-inline" id="transcript-tab-icon"></span>
+              <span>Transcript</span>
+            </button>
+            <button class="tab-btn" data-tab="enhanced">
+              <span class="btn-icon-inline" id="enhanced-tab-icon"></span>
+              <span>AI Enhanced</span>
+            </button>
+            <button class="tab-btn" data-tab="chat">
+              <span class="btn-icon-inline" id="chat-tab-icon"></span>
+              <span>Chat</span>
+            </button>
+          </div>
+
+          <!-- Tab Content -->
+          <div class="tab-content">
+            <!-- Personal Notes Tab -->
+            <div id="notes-tab" class="tab-pane active">
+              <div class="editor-container">
+                <div id="editor-toolbar" class="editor-toolbar">
+                  <button type="button" class="toolbar-btn" data-action="bold" title="Bold (Ctrl+B)">
+                    <strong>B</strong>
+                  </button>
+                  <button type="button" class="toolbar-btn" data-action="italic" title="Italic (Ctrl+I)">
+                    <em>I</em>
+                  </button>
+                  <div class="toolbar-separator"></div>
+                  <button type="button" class="toolbar-btn" data-action="heading1" title="Heading 1">
+                    H1
+                  </button>
+                  <button type="button" class="toolbar-btn" data-action="heading2" title="Heading 2">
+                    H2
+                  </button>
+                  <button type="button" class="toolbar-btn" data-action="heading3" title="Heading 3">
+                    H3
+                  </button>
+                  <div class="toolbar-separator"></div>
+                  <button type="button" class="toolbar-btn" data-action="bulletList" title="Bullet List">
+                    <span class="toolbar-icon bullet-icon" aria-hidden="true"></span>
+                    <span class="toolbar-label">List</span>
+                  </button>
+                  <button type="button" class="toolbar-btn" data-action="orderedList" title="Numbered List">
+                    <span class="toolbar-icon ordered-icon" aria-hidden="true"></span>
+                    <span class="toolbar-label">Numbered</span>
+                  </button>
+                  <button type="button" class="toolbar-btn" data-action="blockquote" title="Quote">
+                    <span class="toolbar-icon quote-icon" aria-hidden="true"></span>
+                    <span class="toolbar-label">Quote</span>
+                  </button>
+                  <div class="toolbar-separator"></div>
+                  <button type="button" class="toolbar-btn" data-action="code" title="Inline Code">
+                    &lt;/&gt;
+                  </button>
+                  <button type="button" class="toolbar-btn" data-action="undo" title="Undo (Ctrl+Z)">
+                    <span class="toolbar-icon undo-icon" aria-hidden="true"></span>
+                    <span class="toolbar-label">Undo</span>
+                  </button>
+                  <button type="button" class="toolbar-btn" data-action="redo" title="Redo (Ctrl+Shift+Z)">
+                    <span class="toolbar-icon redo-icon" aria-hidden="true"></span>
+                    <span class="toolbar-label">Redo</span>
+                  </button>
+                </div>
+                <div id="tiptap-editor"></div>
+              </div>
+            </div>
+
+            <!-- Transcript Tab -->
+            <div id="transcript-tab" class="tab-pane">
+              <div class="transcript-actions">
+                <button 
+                  id="copy-transcript-btn" 
+                  class="btn btn-secondary btn-small" 
+                  type="button" 
+                  title="Copy full transcript to clipboard"
+                  disabled
+                >
+                  <span class="btn-icon-inline" id="copy-transcript-icon"></span>
+                  <span>Copy Transcript</span>
+                </button>
+              </div>
+              <div id="transcript-viewer" class="content-viewer">
+                <div id="transcript-content" class="transcript-content">
+                  <p class="placeholder-text">Transcript will appear here when you start recording...</p>
+                </div>
+                <div id="partial-transcript" class="partial-transcript"></div>
+                <button id="transcript-auto-scroll-btn" class="transcript-auto-scroll-btn" type="button">
+                  Jump to Live Transcript
+                </button>
+              </div>
+            </div>
+
+            <!-- Enhanced Notes Tab -->
+            <div id="enhanced-tab" class="tab-pane">
+              <div class="enhanced-notes-header">
+                <div class="template-selector-group">
+                  <label for="template-selector">Template:</label>
+                  <select id="template-selector" class="template-select">
+                    <option value="default-summary">Default Summary</option>
+                  </select>
+                  <button id="refresh-template-btn" class="btn btn-secondary btn-small" title="Regenerate with selected template">
+                    <span class="btn-icon-inline" id="refresh-template-icon"></span>
+                    <span>Regenerate</span>
+                  </button>
+                </div>
+                <div class="enhanced-actions">
+                  <button
+                    id="copy-enhanced-btn"
+                    class="btn btn-secondary btn-small"
+                    type="button"
+                    title="Copy summary to clipboard"
+                    disabled
+                  >
+                    <span class="btn-icon-inline" id="copy-enhanced-icon"></span>
+                    <span>Copy Summary</span>
+                  </button>
+                  <button id="edit-enhanced-btn" class="btn btn-secondary btn-small" onclick="startEditingEnhanced()" style="display: none;" title="Edit enhanced notes">
+                    <span class="btn-icon-inline" id="edit-enhanced-icon"></span>
+                    <span>Edit</span>
+                  </button>
+                  <button id="clear-enhanced-btn" class="btn btn-secondary btn-small" style="display: none;" title="Clear enhanced notes">
+                    <span class="btn-icon-inline" id="clear-enhanced-icon"></span>
+                    <span>Clear</span>
+                  </button>
+                  <button id="save-enhanced-btn" class="btn btn-primary btn-small" onclick="saveEditedEnhanced()" style="display: none;" title="Save changes">
+                    <span class="btn-icon-inline" id="save-enhanced-icon"></span>
+                    <span>Save</span>
+                  </button>
+                  <button id="cancel-enhanced-btn" class="btn btn-secondary btn-small" onclick="cancelEditedEnhanced()" style="display: none;" title="Cancel editing">
+                    <span class="btn-icon-inline" id="cancel-enhanced-icon"></span>
+                    <span>Cancel</span>
+                  </button>
+                </div>
+              </div>
+              <div id="enhanced-viewer" class="content-viewer">
+                <div id="enhanced-content" class="enhanced-content markdown-content">
+                  <p class="placeholder-text">Click "Enhance with AI" to generate enhanced notes from your transcript and personal notes.</p>
+                </div>
+                <div
+                  id="enhanced-progress"
+                  class="enhanced-progress is-hidden"
+                  aria-live="polite"
+                  aria-hidden="true"
+                >
+                  <div class="enhanced-progress-visual" aria-hidden="true">
+                    <span class="enhanced-progress-dot"></span>
+                    <span class="enhanced-progress-dot"></span>
+                    <span class="enhanced-progress-dot"></span>
+                  </div>
+                  <div class="enhanced-progress-text">
+                    <p>Enhancing your notes…</p>
+                    <p class="small-text">Feel free to keep working while we finish up.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="editor-container" id="enhanced-editor-container" style="display: none;">
+                <div id="enhanced-toolbar" class="editor-toolbar">
+                  <button type="button" class="toolbar-btn" data-action="bold" title="Bold (Ctrl+B)">
+                    <strong>B</strong>
+                  </button>
+                  <button type="button" class="toolbar-btn" data-action="italic" title="Italic (Ctrl+I)">
+                    <em>I</em>
+                  </button>
+                  <div class="toolbar-separator"></div>
+                  <button type="button" class="toolbar-btn" data-action="heading1" title="Heading 1">
+                    H1
+                  </button>
+                  <button type="button" class="toolbar-btn" data-action="heading2" title="Heading 2">
+                    H2
+                  </button>
+                  <button type="button" class="toolbar-btn" data-action="heading3" title="Heading 3">
+                    H3
+                  </button>
+                  <div class="toolbar-separator"></div>
+                  <button type="button" class="toolbar-btn" data-action="bulletList" title="Bullet List">
+                    <span class="toolbar-icon bullet-icon" aria-hidden="true"></span>
+                    <span class="toolbar-label">List</span>
+                  </button>
+                  <button type="button" class="toolbar-btn" data-action="orderedList" title="Numbered List">
+                    <span class="toolbar-icon ordered-icon" aria-hidden="true"></span>
+                    <span class="toolbar-label">Numbered</span>
+                  </button>
+                  <button type="button" class="toolbar-btn" data-action="blockquote" title="Quote">
+                    <span class="toolbar-icon quote-icon" aria-hidden="true"></span>
+                    <span class="toolbar-label">Quote</span>
+                  </button>
+                  <div class="toolbar-separator"></div>
+                  <button type="button" class="toolbar-btn" data-action="code" title="Inline Code">
+                    &lt;/&gt;
+                  </button>
+                  <button type="button" class="toolbar-btn" data-action="undo" title="Undo (Ctrl+Z)">
+                    <span class="toolbar-icon undo-icon" aria-hidden="true"></span>
+                    <span class="toolbar-label">Undo</span>
+                  </button>
+                  <button type="button" class="toolbar-btn" data-action="redo" title="Redo (Ctrl+Shift+Z)">
+                    <span class="toolbar-icon redo-icon" aria-hidden="true"></span>
+                    <span class="toolbar-label">Redo</span>
+                  </button>
+                </div>
+                <div id="enhanced-tiptap-editor"></div>
+              </div>
+            </div>
+
+            <!-- Chat Tab -->
+            <div id="chat-tab" class="tab-pane">
+              <div class="chat-container">
+                <div id="chat-messages" class="chat-messages">
+                  <div class="chat-welcome">
+                    <p><span class="inline-icon" id="chat-welcome-icon"></span>Ask questions about your meeting</p>
+                    <p class="small-text">Examples: "What were the key decisions?", "List the action items", "Who said what about the budget?"</p>
+                  </div>
+                </div>
+                <div class="chat-input-container">
+                  <input 
+                    id="chat-input" 
+                    type="text" 
+                    class="chat-input" 
+                    placeholder="Ask a question about this meeting..."
+                  />
+                  <button id="chat-send-btn" class="btn btn-primary">Send</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab Find Overlay -->
+            <div 
+              id="tab-find" 
+              class="tab-find hidden" 
+              role="dialog" 
+              aria-label="Find in current tab"
+            >
+              <div class="tab-find-input-group">
+                <input 
+                  id="tab-find-input" 
+                  type="search" 
+                  class="tab-find-input" 
+                  placeholder="Find in tab..."
+                  aria-label="Find in tab input"
+                />
+                <span id="tab-find-count" class="tab-find-count" aria-live="polite">0/0</span>
+              </div>
+              <div class="tab-find-actions">
+                <button 
+                  id="tab-find-prev" 
+                  type="button" 
+                  class="btn-icon tab-find-btn" 
+                  title="Previous match (Shift+Enter)" 
+                  aria-label="Previous match"
+                >
+                  ↑
+                </button>
+                <button 
+                  id="tab-find-next" 
+                  type="button" 
+                  class="btn-icon tab-find-btn" 
+                  title="Next match (Enter)" 
+                  aria-label="Next match"
+                >
+                  ↓
+                </button>
+              </div>
+              <button 
+                id="tab-find-close" 
+                type="button" 
+                class="tab-find-close" 
+                title="Close find (Esc)" 
+                aria-label="Close find"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+      </div>
+      <!-- End Meetings Mode Container -->
+
+      <!-- Calendar Mode Container -->
+      <div id="calendar-container" class="mode-container">
+        <main class="calendar-view">
+          <div class="calendar-toolbar">
+            <div class="calendar-toolbar-left">
+              <div class="calendar-day-switcher">
+                <input 
+                  id="calendar-date-picker" 
+                  type="date" 
+                  class="calendar-date-picker" 
+                  aria-label="Jump to date"
+                />
+                <button id="calendar-prev-day-btn" class="calendar-week-btn" title="Previous day" aria-label="Previous day">←</button>
+                <button id="calendar-next-day-btn" class="calendar-week-btn" title="Next day" aria-label="Next day">→</button>
+                <button id="calendar-today-btn" class="btn btn-secondary btn-small" type="button">Today</button>
+              </div>
+            </div>
+            <div class="calendar-toolbar-right">
+              <div class="calendar-toolbar-meta">
+                <span id="calendar-last-sync" class="calendar-last-sync">Last synced: -</span>
+              </div>
+              <div class="calendar-toolbar-actions">
+                <select id="calendar-filter" class="calendar-filter">
+                  <option value="all">All calendars</option>
+                </select>
+                <button id="calendar-sync-btn" class="btn btn-secondary btn-small" title="Sync calendar events" type="button">
+                  <span class="btn-icon-inline" id="calendar-sync-icon"></span>
+                  <span>Sync</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="calendar-priority-row">
+            <div id="calendar-priority-now" class="calendar-priority-card"></div>
+            <div id="calendar-priority-next" class="calendar-priority-card"></div>
+          </div>
+
+          <div class="calendar-layout">
+            <section class="calendar-pane calendar-timeline-pane">
+              <div id="calendar-timeline" class="calendar-listing"></div>
+            </section>
+
+            <section class="calendar-pane calendar-map-pane">
+              <div class="calendar-map-controls">
+                <div id="calendar-day-label" class="calendar-day-label"></div>
+                <div class="calendar-map-buttons">
+                  <button id="calendar-prev-week-btn" class="calendar-week-btn subtle" title="Previous day" aria-label="Previous day">«</button>
+                  <button id="calendar-next-week-btn" class="calendar-week-btn subtle" title="Next day" aria-label="Next day">»</button>
+                </div>
+              </div>
+              <div class="calendar-grid-wrapper">
+                <div id="calendar-grid" class="calendar-grid"></div>
+              </div>
+              <div id="calendar-day-agenda" class="calendar-day-agenda"></div>
+            </section>
+          </div>
+        </main>
+      </div>
+      <!-- End Calendar Mode Container -->
+
+      <!-- Tasks Mode Container -->
+      <div id="tasks-container" class="mode-container">
+        <main class="tasks-view">
+          <div class="tasks-header">
+            <h1><span class="heading-icon" id="tasks-heading-icon"></span>Tasks</h1>
+            <button id="pop-out-tasks-btn" class="btn btn-secondary btn-small">
+              <span class="btn-icon-inline" id="pop-out-icon"></span>
+              <span>Pop Out</span>
+            </button>
+          </div>
+
+          <div class="tasks-content">
+            <div class="add-task-section">
+              <div class="add-task-row">
+                <input 
+                  id="add-task-input" 
+                  type="text" 
+                  class="add-task-input" 
+                  placeholder="+ Add new task..."
+                />
+                <button 
+                  id="add-task-date-btn" 
+                  type="button" 
+                  class="add-task-date-btn"
+                >
+                  <span class="btn-icon-inline" id="add-task-date-icon"></span>
+                  <span>Add due date</span>
+                </button>
+                <button 
+                  id="add-task-btn" 
+                  type="button" 
+                  class="add-task-submit-btn"
+                  title="Create task"
+                  aria-label="Create task"
+                >
+                  <span class="btn-icon-inline" id="add-task-submit-icon"></span>
+                </button>
+              </div>
+            </div>
+
+            <div class="task-filters">
+              <button id="task-filter-all" class="task-filter-btn active" data-filter="all">
+                All
+              </button>
+              <button id="task-filter-today" class="task-filter-btn" data-filter="today">
+                Today
+              </button>
+              <button id="task-filter-week" class="task-filter-btn" data-filter="week">
+                This Week
+              </button>
+              <button id="task-filter-overdue" class="task-filter-btn" data-filter="overdue">
+                Overdue
+              </button>
+              <button id="toggle-completed-btn" class="task-filter-btn" style="margin-left: auto;" title="Show/hide completed tasks">
+                <span class="btn-icon-inline" id="toggle-completed-icon"></span>
+                <span>Completed</span>
+              </button>
+            </div>
+
+            <div id="tasks-list" class="tasks-list">
+              <div class="empty-state">
+                <p>No tasks yet!</p>
+                <p class="small-text">Add your first task to get started</p>
+              </div>
+            </div>
+
+            <div class="tasks-footer">
+              <span id="tasks-count" class="tasks-count">0 tasks</span>
+            </div>
+          </div>
+        </main>
+      </div>
+      <!-- End Tasks Mode Container -->
+    </div>
+  </body>
+</html>
