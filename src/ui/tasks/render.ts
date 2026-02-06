@@ -117,6 +117,7 @@ function setupTaskItemListeners(taskId: string): void {
   });
 
   const title = document.querySelector(`.task-title[data-task-id="${taskId}"]`) as HTMLElement | null;
+  let selectAllTimeout: number | undefined;
   title?.addEventListener("click", () => {
     const currentEditingTaskId = getCurrentEditingTaskId();
     if (currentEditingTaskId && currentEditingTaskId !== taskId) {
@@ -129,11 +130,24 @@ function setupTaskItemListeners(taskId: string): void {
       title.focus();
       setCurrentEditingTaskId(taskId);
 
-      const range = document.createRange();
-      range.selectNodeContents(title);
-      const selection = window.getSelection();
-      selection?.removeAllRanges();
-      selection?.addRange(range);
+      if (selectAllTimeout) {
+        window.clearTimeout(selectAllTimeout);
+      }
+      selectAllTimeout = window.setTimeout(() => {
+        if (document.activeElement !== title) return;
+        const range = document.createRange();
+        range.selectNodeContents(title);
+        const selection = window.getSelection();
+        selection?.removeAllRanges();
+        selection?.addRange(range);
+      }, 250);
+    }
+  });
+
+  title?.addEventListener("dblclick", () => {
+    if (selectAllTimeout) {
+      window.clearTimeout(selectAllTimeout);
+      selectAllTimeout = undefined;
     }
   });
 
